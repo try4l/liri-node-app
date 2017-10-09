@@ -1,6 +1,27 @@
-// At the top of the liri.js file, write the code you need to grab the data from keys.js. Then store the keys in a variable.
+// Constructors for Spotify and Twitter
+var Spotify = require('node-spotify-api');
+var Twitter = require('twitter');
+
+// Package for HTTP calls
+var request = require('request');
+
+// File System pkg
+var fs = require('fs');
+
+// Grab the key data from keys.js
 var keys = require('./keys.js');
 
+//Make REST api client objects
+var spotify = new Spotify({
+  id: keys.spotifyKeys.client_id,
+  secret: keys.spotifyKeys.client_secret
+});
+var twitter = new Twitter({
+  consumer_key: keys.twitterKeys.consumer_key,
+  consumer_secret: keys.twitterKeys.consumer_secret,
+  access_token_key: keys.twitterKeys.access_token_key,
+  access_token_secret: keys.twitterKeys.access_token_secret
+});
 
 var cmdLineArgs = process.argv;
 console.log("Command Line Args: ", process.argv);
@@ -17,22 +38,41 @@ var liriObj = {
 
 	processTweets: function () {
 		console.log("liriObj.processTweets: ");
-		// Show my tweets
+		// Construct query and show the results
+		var params = {screen_name: 'Al_n_Dev'};
+		twitter.get('statuses/user_timeline', params, function(error, tweets, response) {
+  			if (!error) {
+    			console.log(tweets);
+  			}
+		});
 	},
 
 	processSpotify: function () {
 		console.log("liriObj.processSpotify: ");
-		// Show my tweets
+		// Construct query and show the results
+		spotify
+		  .request('https://api.spotify.com/v1/tracks/7yCPwWs66K8Ba5lFuU2bcx')
+		  .then(function(data) {
+		    console.log(data); 
+		  })
+		  .catch(function(err) {
+		    console.error('Error occurred: ' + err); 
+		  });
 	},
 
 	processOmdb: function () {
 		console.log("liriObj.processOmdb: ");
-		// Show my tweets
+		// construct query and show the results
+		request('http://www.omdbapi.com/?t=dark+star&y=&plot=short&apikey=40e9cece', function (error, response, body) {
+  		console.log('error:', error); // Print the error if one occurred
+  		console.log('statusCode:', response && response.statusCode); // Print the response status code if a response was received
+  		console.log('body:', body); 
+		});
 	},
 
 	processRandom: function () {
 		console.log("liriObj.processRandom: ");
-		// Show my tweets
+		// Read the random.txt file and then... do-what-it-says
 	},
 
 	showUsage: function () {
@@ -65,6 +105,12 @@ var liriObj = {
 		console.log("--------------------------");
 		console.log("omdbKeys:");
 		console.log(keys.omdbKeys);
+		// Show the client api objects
+		console.log("Spotity and Twitter client vars:");
+		console.log("Spotify: ", spotify);
+		console.log("Twitter: ", twitter);
+		console.log("request: ", request);
+		console.log("fs: ", fs);
 	},
 } // liriObj
 
