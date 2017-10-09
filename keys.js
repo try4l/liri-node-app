@@ -20,5 +20,5 @@ var omdbKeys = {
 module.exports = {
 	twitterKeys: twitterKeys,
 	spotifyKeys: spotifyKeys,
-	obdbKeys: omdbKeys,
+	omdbKeys: omdbKeys,
 }

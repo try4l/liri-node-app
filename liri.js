@@ -1,15 +1,17 @@
 // At the top of the liri.js file, write the code you need to grab the data from keys.js. Then store the keys in a variable.
 var keys = require('./keys.js');
-//var liri = require('./liri.js');
+
 
 var cmdLineArgs = process.argv;
 console.log("Command Line Args: ", process.argv);
 
 var command = process.argv[2];
+var item = process.argv[3];
 console.log("argv[0] and argv[1] had better be 'node' and 'liri' (or 'liri.js'), respectively");
 console.log("process.argv[0]: ", process.argv[0]);
 console.log("process.argv[1]: ", process.argv[1]);
-console.log("process.argv[2]: ", command);
+console.log("process.argv[2]: 'command' ", command);
+console.log("process.argv[3]: 'item' ", item);
 
 var liriObj = {
 
@@ -28,20 +30,24 @@ var liriObj = {
 		// Show my tweets
 	},
 
-	processDoWhatItSays: function () {
-		console.log("liriObj.processDoWhatItSays: ");
+	processRandom: function () {
+		console.log("liriObj.processRandom: ");
 		// Show my tweets
 	},
 
 	showUsage: function () {
-        console.log("Liri Usage: you must type:");
+		console.log("--------------------------");
+		console.log("Liri Usage: you must type:");
         console.log("node liri <command>");
+        console.log("--------------------------");
         console.log("\twhere <command> is one of the following:");
         console.log("\tmy-tweets");
         console.log("\tspotify-this-song 'song name'");
         console.log("\tmovie-this 'movie title'");
         console.log("\tdo-what-it-says");
-        console.log("\tnote: 'spotify-this-song' or 'movie-this' option should be followed by a quoted string (song or movie, resp.) ");		
+        console.log("\tnote: 'spotify-this-song' or 'movie-this' option");
+        console.log("\t      should be followed by a quoted string (song or movie, resp.) ");
+		console.log("--------------------------");		
 	},
 
 	showKeys: function () {
@@ -55,18 +61,18 @@ var liriObj = {
 		console.log(keys.twitterKeys);
 		console.log("--------------------------");
 		console.log("spotifyKeys:");
-		console.log(keys.SpotifyKeys);
+		console.log(keys.spotifyKeys);
 		console.log("--------------------------");
-		console.log("omdbKeys");
-		console.log(JSON.stringify(keys.omdbKeys));
+		console.log("omdbKeys:");
+		console.log(keys.omdbKeys);
 	},
 } // liriObj
 
 // Make it so liri.js can take in one of the following commands:
-// my-tweets
-// spotify-this-song
-// movie-this
-// do-what-it-says
+// 	my-tweets
+// 	spotify-this-song
+// 	movie-this
+// 	do-what-it-says
 switch(command) {
     case 'my-tweets':
         liriObj.processTweets();
@@ -83,7 +89,11 @@ switch(command) {
     case 'do-what-it-says':
         liriObj.processRandom();
         break;
-            
+
+    case 'show-keys':
+        liriObj.showKeys();
+        break;
+
     default:
         liriObj.showUsage();
         break;
