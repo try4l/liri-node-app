@@ -60,6 +60,16 @@ Song.prototype.display = function () {
 	console.log("Preview Link: ", this.previewLink);
 };
 
+ var Tweets = function (tweetArray) {
+ 	this.tweetArray = tweetArray;
+ };
+
+ Tweets.prototype.display = function () {
+ 	for (var i = 0; i < this.tweetArray.length; i++) {
+    	console.log("Tweet: ", tweetArray[i]);
+ 	}
+ };
+
 // ****************************************************************************
 // LIRI is Language Interpretation and Recognition Interface
 // This is the main object for wrapping all of our LIRI functionality
@@ -116,7 +126,7 @@ var liriObj = {
 		console.log("liriObj.processOmdb: ");
 		console.log("item: ", item);
 		// construct query and show the results
-		request('http://www.omdbapi.com/?t=dark+star&y=&plot=short&apikey=40e9cece', function (error, response, body) {
+		request("http://www.omdbapi.com/?t=" + item + "&y=&plot=short&apikey=40e9cece", function (error, response, body) {
   		console.log('error:', error); // Print the error if one occurred
   		console.log('statusCode:', response && response.statusCode); // Print the response status code if a response was received
   		console.log('body:', JSON.parse(body)); 
