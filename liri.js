@@ -47,12 +47,13 @@ Movie.prototype.display = function () {
 };
 
 Movie.prototype.fileLog = function () {
-	liriObj.logResults("My Movie:");
+	var logString = "--------------------------\n" + "My Movie: \n";
 	for (var key in this) {
 		if (this.hasOwnProperty(key)) {
-			liriObj.logResults(key + ": " + this[key]);			
+			logString += key + ": " + this[key] + "\n";
 		}
 	}
+	liriObj.logResults(logString);
 };
 
 var Song = function (artist, song, album, previewLink) {
@@ -70,12 +71,13 @@ Song.prototype.display = function () {
 };
 
 Song.prototype.fileLog = function () {
-	liriObj.logResults("My Song: ");
+	var logString = "--------------------------\n" + "My Song: \n";
 	for (var key in this) {
 		if (this.hasOwnProperty(key)) {
-			liriObj.logResults(key + ": " + this[key]);			
+			logString += key + ": " + this[key] + "\n";			
 		}
 	}
+	liriObj.logResults(logString);
 };
 
 var Tweets = function (tweetArray) {
@@ -89,10 +91,11 @@ Tweets.prototype.display = function () {
 };
 
 Tweets.prototype.fileLog = function () {
-	liriObj.logResults("My Tweets:");
+	var logString = "--------------------------\n" + "My Tweets: \n";
  	for (var i = 0; i < this.tweetArray.length; i++) {
-    	liriObj.logResults("Tweet: " + this.tweetArray[i]);
+    	logString += "Tweet: " + this.tweetArray[i] + "\n";	
  	}
+ 	liriObj.logResults(logString);
 };
 
 // ****************************************************************************
@@ -205,7 +208,7 @@ var liriObj = {
   			if (error) {
     			console.log(err);
   			} else {
-    		console.log("Data logged");
+    			console.log("Data logged");
   			}
 		});
 	},
@@ -263,16 +266,12 @@ var liriObj = {
 
 	fileLogKeys: function () {
 		// Log the keys to the log file individually
-		this.logResults("--------------------------");
 		this.logResults("twitterKeys:");
-		this.logResults(keys.twitterKeys);
-		this.logResults("--------------------------");
+		this.logResults(JSON.stringify(keys.twitterKeys));
 		this.logResults("spotifyKeys:");
-		this.logResults(keys.spotifyKeys);
-		this.logResults("--------------------------");
+		this.logResults(JSON.stringify(keys.spotifyKeys));
 		this.logResults("omdbKeys:");
-		this.logResults(keys.omdbKeys);
-		this.logResults("--------------------------");
+		this.logResults(JSON.stringify(keys.omdbKeys));
 	},
 
 	showClients: function () {
