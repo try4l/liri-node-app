@@ -23,7 +23,7 @@ var twitter = new Twitter({
   access_token_secret: keys.twitterKeys.access_token_secret
 });
 
-// Song, Movie and Tweet constructors
+// Song, Movie and Tweets constructors -- and display and log prototype functions
 var Movie = function (title, year, imdbRating, rottenTomatoesRating, country, language, plot, actors) {
 	this.title = title;
 	this.year = year;
@@ -46,7 +46,16 @@ Movie.prototype.display = function () {
 	console.log("Actors: ", this.actors);
 };
 
-var Song = function (artist, song, previewLink, album) {
+Movie.prototype.fileLog = function () {
+	liriObj.logResults("My Movie:");
+	for (var key in this) {
+		if (this.hasOwnProperty(key)) {
+			liriObj.logResults(key + ": " + this[key]);			
+		}
+	}
+};
+
+var Song = function (artist, song, album, previewLink) {
 	this.artist = artist;
 	this.song = song;
 	this.album = album;
@@ -60,15 +69,31 @@ Song.prototype.display = function () {
 	console.log("Preview Link: ", this.previewLink);
 };
 
- var Tweets = function (tweetArray) {
- 	this.tweetArray = tweetArray;
- };
+Song.prototype.fileLog = function () {
+	liriObj.logResults("My Song: ");
+	for (var key in this) {
+		if (this.hasOwnProperty(key)) {
+			liriObj.logResults(key + ": " + this[key]);			
+		}
+	}
+};
 
- Tweets.prototype.display = function () {
+var Tweets = function (tweetArray) {
+ 	this.tweetArray = tweetArray;
+};
+
+Tweets.prototype.display = function () {
  	for (var i = 0; i < this.tweetArray.length; i++) {
-    	console.log("Tweet: ", tweetArray[i]);
+    	console.log("Tweet: ", this.tweetArray[i]);
  	}
- };
+};
+
+Tweets.prototype.fileLog = function () {
+	liriObj.logResults("My Tweets:");
+ 	for (var i = 0; i < this.tweetArray.length; i++) {
+    	liriObj.logResults("Tweet: " + this.tweetArray[i]);
+ 	}
+};
 
 // ****************************************************************************
 // LIRI is Language Interpretation and Recognition Interface
@@ -78,7 +103,7 @@ Song.prototype.display = function () {
 var liriObj = {
 
 	processTweets: function () {
-		console.log("liriObj.processTweets: ");
+		//console.log("liriObj.processTweets: ");
 		// Construct query and show the results
 		var params = {screen_name: 'Al_n_Dev'};
 		twitter.get('statuses/user_timeline', params, function(error, tweets, response) {
@@ -89,61 +114,73 @@ var liriObj = {
   				console.log("--------------------------");
     			//console.log(tweets);
     			//console.log(response);
+    			var tweetArr = [];
     			for (var i = 0; i < tweets.length; i++) {
-    				console.log(tweets[i].text + "\n");
-    			}
-
+    				tweetArr.push(tweets[i].text);
+    			};
+    			// Make a Tweets (i.e. tweet array) and display it
+    			var tweets = new Tweets (tweetArr);
+    			tweets.display();
+    			tweets.fileLog();	// and log it to the log file
   			}
 		});
 	},
 
 	processSpotify: function (item="The Sign Ace of Base") {
-		console.log("liriObj.processSpotify: ");
-		console.log("item: ", item);
+		//console.log("liriObj.processSpotify: ");
+		//console.log("item: ", item);
 		// Construct query and show the results
-		spotify.search({ type: 'track', query: item, limit: 1 }, function(err, data) {
-  			if (err) {
-    			return console.log('Error occurred: ' + err);
+		spotify.search({ type: 'track', query: item, limit: 1 }, function(error, data) {
+  			if (error) {
+    			return console.log('Error occurred: ' + error);
   			}
- 
-			console.log(data);
-			console.log(data.tracks.items[0].artists[0].name);
-			console.log(data.tracks.items[0].name); 
-			console.log(data.tracks.items[0].album.name);
-			console.log(data.tracks.items[0].href);
+
+  			// Make a song and display it
+  			var song = new Song (data.tracks.items[0].artists[0].name, data.tracks.items[0].name, 
+  								data.tracks.items[0].album.name, data.tracks.items[0].href);
+  			song.display();
+  			song.fileLog();	// and log it to the log file 
 		});		
-		// spotify
-		//   .request('https://api.spotify.com/v1/tracks/7yCPwWs66K8Ba5lFuU2bcx')
-		//   .then(function(data) {
-		//     console.log(data); 
-		//   })
-		//   .catch(function(err) {
-		//     console.error('Error occurred: ' + err); 
-		//   });
 	},
 
 	processOmdb: function (item="Mr. Nobody") {
-		console.log("liriObj.processOmdb: ");
-		console.log("item: ", item);
-		// construct query and show the results
+		//console.log("liriObj.processOmdb: ");
+		//console.log("item: ", item);
+		// Construct query and show the results
 		request("http://www.omdbapi.com/?t=" + item + "&y=&plot=short&apikey=40e9cece", function (error, response, body) {
-  		console.log('error:', error); // Print the error if one occurred
-  		console.log('statusCode:', response && response.statusCode); // Print the response status code if a response was received
-  		console.log('body:', JSON.parse(body)); 
-  		var Body = JSON.parse(body);
-		console.log("Movie Title: ", Body.Title);
-		console.log("Year: ", Body.Year);
-		console.log("IMDB Rating: ", Body.imdbRating);
-		console.log("Rotten Tomatoes Rating: ", Body.Ratings[0].Value);
-		console.log("Country: ", Body.Country);
-		console.log("Language: ", Body.Language);
-		console.log("Plot: ", Body.Plot);
-		console.log("Actors: ", Body.Actors);
+			//console.log("response: ", response);
+			//console.log("body: ", body);
+		  	if (error) {
+    			return console.log('Error occurred: ' + error);
+  			}
+  			if (response && response.statusCode!==200) {
+    			return console.log('Something Went Wrong statusCode: ' + response.statusCode);
+  			}
+
+            var pBody = JSON.parse(body);
+            //console.log("JSON parsed body: ", pBody);
+
+            if (pBody.Response === 'True') {
+  				// Make a movie and display it
+  				// Fix for missing Rotten Tomatoes rating - search could crash for missing Ratings (search for title "vomit" e.g.)
+  				if (pBody.Ratings[0]) {
+  					var movie = new Movie (pBody.Title, pBody.Year, pBody.imdbRating, pBody.Ratings[0].Value, pBody.Country, pBody.Language, 
+  									pBody.Plot,  pBody.Actors);
+  				} else {
+  					var movie = new Movie (pBody.Title, pBody.Year, pBody.imdbRating, "N/A", pBody.Country, pBody.Language, 
+  									pBody.Plot,  pBody.Actors);
+  				}
+  				movie.display();
+  				movie.fileLog();	// and log it to the log file         	
+      
+        	} else {
+        		console.log("Error Retrieving Data: ", pBody.Error);
+        	}
 		});
 	},
 
 	processRandom: function () {
-		console.log("liriObj.processRandom: ");
+		//console.log("liriObj.processRandom: ");
 		// Read the random.txt file and then... do-what-it-says
 		fs.readFile("random.txt", "utf8", function(error, data) {
 			// If the code experiences any errors it will log the error to the console.
@@ -160,7 +197,6 @@ var liriObj = {
 			liriObj.processCommand(dataArr[0], dataArr[1]);
 		});
 	},
-
 
 	// Save results of LIRI commands in the log.txt file
 	logResults: function (data) {
@@ -183,67 +219,86 @@ var liriObj = {
     			return console.log(error);
   			}
   			console.log(data);
+
+			if (item==='clear') {
+				fs.writeFile("log.txt", " -- LIRI Log File -- " + "\n", function(err) {
+	  				// Show any error
+	  				if (err) {
+	    				return console.log(err);
+	  				}
+	    			console.log("LIRI log file cleared");
+				});
+			}
 		});
-		if (item==='clear') {
-			fs.writeFile("log.txt", " -- LIRI Log File -- " + "\n", function(err) {
-  				// Show any error
-  				if (err) {
-    				return console.log(err);
-  				}
-    			console.log("LIRI log file cleared");
-			});
-		}
 	},
 
 	// Tell the user what they can do
 	showUsage: function () {
 		console.log("--------------------------");
 		console.log("Liri Usage: you must type:");
-        console.log("node liri <command>");
+        console.log("node liri COMMAND");
         console.log("--------------------------");
-        console.log("\twhere <command> is one of the following:");
+        console.log("where COMMAND is one of the following:");
         console.log("\tmy-tweets");
         console.log("\tspotify-this-song 'song name'");
         console.log("\tmovie-this 'movie title'");
         console.log("\tdo-what-it-says");
         console.log("\tdump-log <clear>");
-        console.log("\tnotes: ");
-        console.log("\t      'spotify-this-song' or 'movie-this' option");
-        console.log("\t      should be followed by a quoted string (song or movie, resp.) ");
-        console.log("\t      <clear> flag on dump-log command is optional and will erase log");
+        console.log("notes: ");
+        console.log("\t'spotify-this-song' or 'movie-this' option");
+        console.log("\tshould be followed by a quoted string (song or movie, resp.) ");
+        console.log("\t'do-what-it-says' reads file random.txt for command input");
+        console.log("\t<clear> flag on dump-log command is optional and will erase log");
 		console.log("--------------------------");
 
 	},
 
-
 	showKeys: function () {
 		// Print everything in exports.
-		// console.log("--------------------------");
-		// console.log("EXPORTS");
-		// console.log(keys);
-		// console.log("--------------------------");
-		// // Print exports individually
-		// console.log("twitterKeys:");
-		// console.log(keys.twitterKeys);
-		// console.log("--------------------------");
-		// console.log("spotifyKeys:");
-		// console.log(keys.spotifyKeys);
-		// console.log("--------------------------");
-		console.log("omdbKeys:");
-		console.log(keys.omdbKeys);
+		console.log("--------------------------");
+		console.log("Keys");
+		console.log(keys);
+		console.log("--------------------------");
+	},
+
+	fileLogKeys: function () {
+		// Log the keys to the log file individually
+		this.logResults("--------------------------");
+		this.logResults("twitterKeys:");
+		this.logResults(keys.twitterKeys);
+		this.logResults("--------------------------");
+		this.logResults("spotifyKeys:");
+		this.logResults(keys.spotifyKeys);
+		this.logResults("--------------------------");
+		this.logResults("omdbKeys:");
 		this.logResults(keys.omdbKeys);
-		// Show the client api objects
-		// console.log("Spotity and Twitter client vars:");
-		// console.log("Spotify: ", spotify);
-		// console.log("Twitter: ", twitter);
-		// console.log("request: ", request);
-		// console.log("fs: ", fs);
+		this.logResults("--------------------------");
+	},
+
+	showClients: function () {
+		// Show the client api objects		
+		console.log("--------------------------");
+		console.log("Spotity and Twitter client vars:");
+		console.log("--------------------------");
+		console.log("Spotify: ", spotify);
+		console.log("--------------------------");
+		console.log("Twitter: ", twitter);
+		console.log("--------------------------");
+	},
+
+	showPackages: function () {
+		// Show packages
+		console.log("--------------------------");
+		console.log("request: ", request);
+		console.log("--------------------------");
+		console.log("fs: ", fs);
+		console.log("--------------------------");
 	},
 
 	// Parse the command line arguments
 	processCmdLine: function (cmdLineArgs) {
 		var cmdLineArgs = process.argv;
-		console.log("Command Line Args: ", process.argv);
+		//console.log("Command Line Arguments: ", cmdLineArgs);
 
 		var command = process.argv[2];
 		var item = process.argv[3];
@@ -258,6 +313,8 @@ var liriObj = {
 	// 		spotify-this-song
 	// 		movie-this
 	// 		do-what-it-says
+	// 		dump-log (accepts optional <clear> tag)
+	// 		various other for debug and for fun
 		switch(command) {
     		case 'my-tweets':
     		    this.processTweets();
@@ -277,6 +334,18 @@ var liriObj = {
 		
     		case 'show-keys':
     		    this.showKeys();
+    		    break;
+
+    		case 'filelog-keys':
+    		    this.fileLogKeys();
+    		    break;
+
+    		case 'show-clients':
+    		    this.showClients();
+    		    break;
+
+    		case 'show-pkgs':
+    		    this.showPackages();
     		    break;
 
     		case 'dump-log':
